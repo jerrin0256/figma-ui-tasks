@@ -1,3 +1,284 @@
+// import { Ionicons } from "@expo/vector-icons";
+// import { router } from "expo-router";
+// import React from "react";
+// import {
+//   Dimensions,
+//   Image,
+//   ScrollView,
+//   StyleSheet,
+//   Text,
+//   TouchableOpacity,
+//   View,
+// } from "react-native";
+// import { LineChart } from "react-native-chart-kit";
+// import Svg, { Path } from "react-native-svg";
+
+// const { width } = Dimensions.get("window");
+
+// export default function Home() {
+//   return (
+//     <View style={{ flex: 1, backgroundColor: "#f4f6f8" }}>
+//       {/* ===== CURVE HEADER ===== */}
+//       <View style={{ position: "relative" }}>
+//         <Svg width={width} height={170} viewBox={`0 0 ${width} 170`}>
+//           <Path
+//             d={`
+//               M0 0
+//               L0 130
+//               C ${width * 0.25} 170,
+//                 ${width * 0.75} 170,
+//                 ${width} 130
+//               L${width} 0
+//               Z
+//             `}
+//             fill="#12b3c7"
+//           />
+//         </Svg>
+
+//         <View style={styles.headerContent}>
+//           <View style={{ flexDirection: "row", alignItems: "center" }}>
+//             <Image
+//               source={require("../../assets/unnamed.png")}
+//               style={styles.logo}
+//               resizeMode="contain"
+//             />
+//             <View style={{ marginLeft: 10 }}>
+//               <View style={{ flexDirection: "row", alignItems: "center" }}>
+//                 <Text style={styles.clinic}>VM CLINIC</Text>
+//                 <Ionicons name="chevron-down" size={16} color="#fff" />
+//               </View>
+//               <Text style={styles.userName}>Dr Iqbal Muhammed</Text>
+//             </View>
+//           </View>
+
+//           <TouchableOpacity onPress={() => router.replace("/login")}>
+//             <Ionicons name="log-out-outline" size={22} color="#fff" />
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+
+//       {/* ===== BODY ===== */}
+//       <ScrollView
+//         style={styles.container}
+//         showsVerticalScrollIndicator={false}
+//         contentContainerStyle={{ paddingTop: 40 }}
+//       >
+//         <View style={styles.body}>
+//           <Text style={styles.greeting}>
+//             Good Morning <Text style={styles.greetingName}>DR IQBAL</Text>,
+//           </Text>
+
+//           {/* PROFILE CARD */}
+//           <View style={styles.profileCard}>
+//             <Image
+//               source={require("../../assets/patient1.jpg")}
+//               style={styles.profileImg}
+//             />
+//             <View>
+//               <Text style={styles.profileName}>Muhammed Iqbal VM</Text>
+//               <Text style={styles.viewProfile}>view profile</Text>
+//             </View>
+//           </View>
+
+//           {/* APPOINTMENT CARD */}
+//           <View style={styles.appointmentCard}>
+//             <View style={styles.appointmentTop}>
+//               <Image
+//                 source={require("../../assets/patient1.jpg")}
+//                 style={styles.appointmentAvatar}
+//               />
+//               <Text style={styles.appointmentName}>Muhammed Janees</Text>
+//             </View>
+
+//             <View style={styles.appointmentBottom}>
+//               <View style={styles.dateRow}>
+//                 <View style={styles.iconText}>
+//                   <Ionicons name="calendar-outline" size={18} color="#777" />
+//                   <Text style={styles.dateText}>20-03-2024</Text>
+//                 </View>
+
+//                 <View style={styles.iconText}>
+//                   <Ionicons name="time-outline" size={18} color="#777" />
+//                   <Text style={styles.dateText}>12:30 pm</Text>
+//                 </View>
+//               </View>
+
+//               <Text style={styles.withText}>
+//                 with{" "}
+//                 <Text style={{ fontWeight: "700" }}>Dr Iqbal Muhammed</Text>
+//               </Text>
+//             </View>
+//           </View>
+
+//           {/* GRAPH TITLE */}
+//           <Text style={styles.graphTitle}>Appointments Graph</Text>
+
+//           <View style={styles.graphCard}>
+//             <LineChart
+//               data={{
+//                 labels: ["01", "02", "03", "04", "05", "06", "07"],
+//                 datasets: [{ data: [6, 9, 10, 14, 16, 13, 7] }],
+//               }}
+//               width={width - 60}
+//               height={220}
+//               chartConfig={{
+//                 backgroundColor: "#fff",
+//                 backgroundGradientFrom: "#fff",
+//                 backgroundGradientTo: "#fff",
+//                 decimalPlaces: 0,
+//                 color: () => "#12b3c7",
+//                 labelColor: () => "#777",
+//               }}
+//               bezier
+//               style={{ borderRadius: 20 }}
+//             />
+//           </View>
+//         </View>
+//       </ScrollView>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: "#fdfdfe",
+//   },
+
+//   headerContent: {
+//     position: "absolute",
+//     top: 70,
+//     left: 20,
+//     right: 20,
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//   },
+
+//   clinic: {
+//     color: "#fff",
+//     fontSize: 18,
+//     fontWeight: "600",
+//     marginRight: 5,
+//   },
+
+//   userName: {
+//     color: "#ffffffcc",
+//     fontSize: 13,
+//   },
+
+//   body: {
+//     padding: 20,
+//   },
+
+//   greeting: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     marginBottom: 20,
+//   },
+
+//   greetingName: {
+//     color: "#12b3c7",
+//     fontWeight: "700",
+//   },
+
+//   profileCard: {
+//     backgroundColor: "#cfe8ed",
+//     padding: 18,
+//     borderRadius: 25,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 25,
+//   },
+
+//   profileImg: {
+//     width: 65,
+//     height: 65,
+//     borderRadius: 32,
+//     marginRight: 15,
+//   },
+
+//   profileName: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//   },
+
+//   viewProfile: {
+//     color: "#777",
+//   },
+
+//   appointmentCard: {
+//     borderRadius: 25,
+//     overflow: "hidden",
+//     marginBottom: 25,
+//     elevation: 4,
+//   },
+
+//   appointmentTop: {
+//     backgroundColor: "#12b3c7",
+//     padding: 20,
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+
+//   appointmentAvatar: {
+//     width: 45,
+//     height: 45,
+//     borderRadius: 22,
+//     marginRight: 15,
+//   },
+
+//   appointmentName: {
+//     color: "#fff",
+//     fontSize: 16,
+//     fontWeight: "600",
+//   },
+
+//   appointmentBottom: {
+//     backgroundColor: "#fff",
+//     padding: 20,
+//   },
+
+//   dateRow: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     marginBottom: 12,
+//   },
+
+//   iconText: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+
+//   dateText: {
+//     marginLeft: 6,
+//   },
+
+//   withText: {
+//     color: "#777",
+//   },
+
+//   graphTitle: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     marginBottom: 15,
+//   },
+
+//   graphCard: {
+//     backgroundColor: "#fff",
+//     borderRadius: 25,
+//     padding: 20,
+//     marginBottom: 30,
+//     elevation: 5,
+//   },
+
+//   logo: {
+//     width: 30,
+//     height: 30,
+//     tintColor: "#fff",
+//   },
+// });
+
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";

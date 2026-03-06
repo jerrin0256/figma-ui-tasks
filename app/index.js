@@ -47,9 +47,9 @@ export default function Index() {
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [logoScale, textFade, textMove, router]);
 
-  const BgIcon = ({ source, style }: any) => (
+  const BgIcon = ({ source, style }) => (
     <Image
       source={source}
       style={[styles.bgIcon, style]}

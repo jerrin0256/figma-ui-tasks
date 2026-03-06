@@ -1,67 +1,3 @@
-// import React from "react";
-// import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-
-// export default function Patients() {
-//   const patients = [
-//     "Muhammed Janees",
-//     "Stella John",
-//     "Arjun Menon",
-//     "Priya Kumar",
-//   ];
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Patients</Text>
-
-//       <ScrollView>
-//         {patients.map((item, index) => (
-//           <View key={index} style={styles.card}>
-//             <Image
-//               source={require("../../assets/patient1.jpg")}
-//               style={styles.image}
-//             />
-//             <Text style={styles.name}>{item}</Text>
-//           </View>
-//         ))}
-//       </ScrollView>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#f4f6f8",
-//     padding: 20,
-//   },
-
-//   title: {
-//     fontSize: 20,
-//     fontWeight: "600",
-//     marginBottom: 20,
-//   },
-
-//   card: {
-//     backgroundColor: "#fff",
-//     padding: 15,
-//     borderRadius: 20,
-//     marginBottom: 15,
-//     elevation: 3,
-//   },
-
-//   image: {
-//     width: "100%",
-//     height: 150,
-//     borderRadius: 15,
-//     marginBottom: 10,
-//   },
-
-//   name: {
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-// });
-
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -75,20 +11,18 @@ import {
 } from "react-native";
 export default function Patients() {
   const router = useRouter();
-
   const patients = [
-    { name: "Muhammed Janees", age: "21’s", gender: "M" },
-    { name: "Arjun Menon", age: "29’s", gender: "M" },
-    { name: "Aisha Nair", age: "41’s", gender: "F" },
-    { name: "Rohan Pillai", age: "23’s", gender: "M" },
-    { name: "Priya Kumar", age: "21’s", gender: "F" },
-    { name: "Aditya Menon", age: "34’s", gender: "F" },
-    { name: "Deepika Nambiar", age: "22’s", gender: "F" },
-    { name: "Siddharth Nair", age: "54’s", gender: "M" },
-    { name: "Ananya Rajan", age: "34’s", gender: "F" },
-    { name: "Rakesh Menon", age: "47’s", gender: "M" },
+    { id: "1", name: "Muhammed Janees", age: "21’s", gender: "M" },
+    { id: "2", name: "Arjun Menon", age: "29’s", gender: "M" },
+    { id: "3", name: "Aisha Nair", age: "41’s", gender: "F" },
+    { id: "4", name: "Rohan Pillai", age: "23’s", gender: "M" },
+    { id: "5", name: "Priya Kumar", age: "21’s", gender: "F" },
+    { id: "6", name: "Aditya Menon", age: "34’s", gender: "F" },
+    { id: "7", name: "Deepika Nambiar", age: "22’s", gender: "F" },
+    { id: "8", name: "Siddharth Nair", age: "54’s", gender: "M" },
+    { id: "9", name: "Ananya Rajan", age: "34’s", gender: "F" },
+    { id: "10", name: "Rakesh Menon", age: "47’s", gender: "M" },
   ];
-
   return (
     <View style={styles.container}>
       {/* TOP STATUS BAR COLOR */}
@@ -113,11 +47,14 @@ export default function Patients() {
       {/* PATIENT LIST */}
       <FlatList
         data={patients}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.row}>
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => router.push(`/patients/${item.id}`)}
+          >
             <Image
               source={require("../../assets/patient1.jpg")}
               style={styles.avatar}

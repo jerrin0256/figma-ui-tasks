@@ -27,7 +27,7 @@ export default function Login() {
       return;
     }
 
-    router.replace("/tabs/home");
+    router.replace("/home");
   };
 
   const isDisabled = !username || !password || !clinicId;

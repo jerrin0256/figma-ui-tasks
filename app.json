@@ -4,7 +4,7 @@
     "slug": "figma-ui-tasks",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+//    "icon": "./assets/icon.png",
     "scheme": "figmauitasks",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

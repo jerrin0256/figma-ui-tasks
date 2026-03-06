@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
 import {
   Image,
   ScrollView,
@@ -40,7 +39,7 @@ export default function Appointment() {
           {/* LOGOUT */}
 
           <TouchableOpacity onPress={() => router.push("/add-appointment")}>
-            <Ionicons name="add-circle-outline" size={26} color="#12b3c7" />
+            <Ionicons name="add-circle-outline" size={35} color="#12b3c7" />
           </TouchableOpacity>
         </View>
 
