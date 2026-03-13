@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+    Alert,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -13,8 +15,33 @@ import {
 export default function AddPrescription() {
   const router = useRouter();
 
+  const [medicine, setMedicine] = useState("");
   const [dosage, setDosage] = useState("");
+  const [unit, setUnit] = useState("Mg");
+  const [timing, setTiming] = useState("");
+  const [duration, setDuration] = useState("30");
+  const [durationUnit, setDurationUnit] = useState("Days");
   const [notes, setNotes] = useState("");
+  const [frequency, setFrequency] = useState([0, 0, 0, 0]);
+
+  const [medicineDropdown, setMedicineDropdown] = useState(false);
+  const [unitDropdown, setUnitDropdown] = useState(false);
+  const [timingDropdown, setTimingDropdown] = useState(false);
+  const [durationUnitDropdown, setDurationUnitDropdown] = useState(false);
+
+  const medicines = ["Omeprazole", "Metoprolol", "Paracetamol", "Amoxicillin", "Ibuprofen"];
+  const units = ["Mg", "Ml", "Tablets"];
+  const timings = ["Before Food", "After Food", "With Food"];
+  const durationUnits = ["Days", "Weeks", "Months"];
+
+  const handleSubmit = () => {
+    if (!medicine || !dosage) {
+      Alert.alert("Error", "Please fill medicine and dosage");
+      return;
+    }
+    Alert.alert("Success", "Prescription added successfully");
+    router.back();
+  };
 
   return (
     <View style={styles.container}>
@@ -32,10 +59,10 @@ export default function AddPrescription() {
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         {/* Medicine */}
         <Text style={styles.label}>Medicine</Text>
-        <View style={styles.inputBox}>
-          <Text style={styles.placeholder}>medicine</Text>
+        <TouchableOpacity style={styles.inputBox} onPress={() => setMedicineDropdown(true)}>
+          <Text style={[styles.placeholder, medicine && { color: "#000" }]}>{medicine || "Select medicine"}</Text>
           <Ionicons name="chevron-down" size={18} color="#12b3c7" />
-        </View>
+        </TouchableOpacity>
 
         {/* Dosage & Frequency */}
         <View style={styles.rowBetween}>
@@ -45,23 +72,32 @@ export default function AddPrescription() {
               <TextInput
                 value={dosage}
                 onChangeText={setDosage}
-                placeholder="dosage"
+                placeholder="Enter dosage"
+                keyboardType="numeric"
                 style={[styles.smallInput, { flex: 1 }]}
               />
-              <View style={styles.unitBox}>
-                <Text>Mg</Text>
+              <TouchableOpacity style={styles.unitBox} onPress={() => setUnitDropdown(true)}>
+                <Text>{unit}</Text>
                 <Ionicons name="chevron-down" size={16} color="#12b3c7" />
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
 
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>Frequency</Text>
             <View style={styles.rowBetween}>
-              {[0, 0, 0, 0].map((_, i) => (
-                <View key={i} style={styles.freqBox}>
-                  <Text>0</Text>
-                </View>
+              {frequency.map((val, i) => (
+                <TouchableOpacity 
+                  key={i} 
+                  style={styles.freqBox}
+                  onPress={() => {
+                    const newFreq = [...frequency];
+                    newFreq[i] = (newFreq[i] + 1) % 3;
+                    setFrequency(newFreq);
+                  }}
+                >
+                  <Text>{val}</Text>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -69,22 +105,25 @@ export default function AddPrescription() {
 
         {/* Timing */}
         <Text style={styles.label}>Timing</Text>
-        <View style={styles.inputBox}>
-          <Text style={styles.placeholder}>medicine timing</Text>
+        <TouchableOpacity style={styles.inputBox} onPress={() => setTimingDropdown(true)}>
+          <Text style={[styles.placeholder, timing && { color: "#000" }]}>{timing || "Select timing"}</Text>
           <Ionicons name="chevron-down" size={18} color="#12b3c7" />
-        </View>
+        </TouchableOpacity>
 
         {/* Duration */}
         <Text style={styles.label}>Duration</Text>
         <View style={styles.row}>
-          <View style={styles.durationNumber}>
-            <Text>30</Text>
-          </View>
+          <TextInput
+            value={duration}
+            onChangeText={setDuration}
+            keyboardType="numeric"
+            style={styles.durationNumber}
+          />
 
-          <View style={[styles.unitBox, { marginLeft: 10 }]}>
-            <Text>Days</Text>
+          <TouchableOpacity style={[styles.unitBox, { marginLeft: 10 }]} onPress={() => setDurationUnitDropdown(true)}>
+            <Text>{durationUnit}</Text>
             <Ionicons name="chevron-down" size={16} color="#12b3c7" />
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Notes */}
@@ -100,10 +139,62 @@ export default function AddPrescription() {
         </View>
 
         {/* ADD BUTTON */}
-        <TouchableOpacity style={styles.addBtn}>
+        <TouchableOpacity style={styles.addBtn} onPress={handleSubmit}>
           <Text style={styles.addBtnText}>ADD</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={medicineDropdown} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setMedicineDropdown(false)}>
+          <View style={styles.dropdown}>
+            {medicines.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.dropdownItem} onPress={() => { setMedicine(item); setMedicineDropdown(false); }}>
+                <Text style={styles.dropdownText}>{item}</Text>
+                {medicine === item && <Ionicons name="checkmark" size={20} color="#12b3c7" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal visible={unitDropdown} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setUnitDropdown(false)}>
+          <View style={styles.dropdown}>
+            {units.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.dropdownItem} onPress={() => { setUnit(item); setUnitDropdown(false); }}>
+                <Text style={styles.dropdownText}>{item}</Text>
+                {unit === item && <Ionicons name="checkmark" size={20} color="#12b3c7" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal visible={timingDropdown} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setTimingDropdown(false)}>
+          <View style={styles.dropdown}>
+            {timings.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.dropdownItem} onPress={() => { setTiming(item); setTimingDropdown(false); }}>
+                <Text style={styles.dropdownText}>{item}</Text>
+                {timing === item && <Ionicons name="checkmark" size={20} color="#12b3c7" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal visible={durationUnitDropdown} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setDurationUnitDropdown(false)}>
+          <View style={styles.dropdown}>
+            {durationUnits.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.dropdownItem} onPress={() => { setDurationUnit(item); setDurationUnitDropdown(false); }}>
+                <Text style={styles.dropdownText}>{item}</Text>
+                {durationUnit === item && <Ionicons name="checkmark" size={20} color="#12b3c7" />}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -191,8 +282,8 @@ const styles = StyleSheet.create({
     height: 45,
     width: 60,
     borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 10,
+    textAlign: "center",
   },
 
   notesBox: {
@@ -213,5 +304,42 @@ const styles = StyleSheet.create({
   addBtnText: {
     color: "#fff",
     fontWeight: "700",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+
+  dropdown: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    width: "100%",
+    maxWidth: 300,
+    maxHeight: 300,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+
+  dropdownText: {
+    fontSize: 15,
+    color: "#374151",
+    fontWeight: "500",
   },
 });

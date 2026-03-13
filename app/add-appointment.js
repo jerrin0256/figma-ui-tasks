@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -196,5 +197,101 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "700",
+  },
+});
+
+export function EditAppointmentModal({ visible, onClose, appointment, onSave }) {
+  const [doctor, setDoctor] = useState(appointment?.doctor || "");
+  const [date, setDate] = useState(appointment?.date || "");
+  const [time, setTime] = useState(appointment?.time || "");
+  const [status, setStatus] = useState(appointment?.status || "");
+
+  const handleSave = () => {
+    onSave({ ...appointment, doctor, date, time, status });
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide">
+      <View style={modalStyles.overlay}>
+        <View style={modalStyles.modal}>
+          <View style={modalStyles.header}>
+            <Text style={modalStyles.title}>Edit Appointment</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Doctor Name"
+            value={doctor}
+            onChangeText={setDoctor}
+          />
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Date"
+            value={date}
+            onChangeText={setDate}
+          />
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Time"
+            value={time}
+            onChangeText={setTime}
+          />
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Status"
+            value={status}
+            onChangeText={setStatus}
+          />
+          <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSave}>
+            <Text style={modalStyles.saveTxt}>Save</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modal: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  saveBtn: {
+    backgroundColor: "#12b3c7",
+    padding: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  saveTxt: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

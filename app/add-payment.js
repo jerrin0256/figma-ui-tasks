@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function PaymentForm() {
   const router = useRouter();
@@ -21,14 +22,15 @@ export default function PaymentForm() {
 
   useEffect(() => {
     if (payment) {
-      const data = JSON.parse(payment);
-
-      setDoctor(data.doctor);
-      setInvoiceNo(data.invoiceNo);
-      setAmount(data.amount);
-      setDescription(data.description);
+      try {
+        const data = JSON.parse(payment);
+        setDoctor(data.doctor ?? "");
+        setInvoiceNo(data.invoiceNo ?? "");
+        setAmount(data.amount ?? "");
+        setDescription(data.description ?? "");
+      } catch (_) {}
     }
-  }, []);
+  }, [payment]);
 
   const handleSubmit = () => {
     const newPayment = {
@@ -45,9 +47,15 @@ export default function PaymentForm() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>
-        {isEdit ? "Edit Payment" : "Add Payment"}
-      </Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#12b3c7" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {isEdit ? "Edit Payment" : "Add Payment"}
+        </Text>
+        <View style={styles.placeholder} />
+      </View>
 
       <Text style={styles.label}>Doctor</Text>
       <TextInput
@@ -90,9 +98,35 @@ export default function PaymentForm() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 80,
+    padding: 20,
+    paddingTop: 60,
     backgroundColor: "#fff",
   },
+  header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 55,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#e6f6f8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: { fontSize: 18, fontWeight: "700" },
+  placeholder: { width: 36 },
 
   title: {
     fontSize: 20,

@@ -59,241 +59,193 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      {/* ================= TOP ICONS ================= */}
-
+      {/* TOP LEFT */}
       <BgIcon
         source={require("../assets/medical/heart.png")}
-        style={{ top: 75, left: 300, width: 40, height: 40 }}
+        style={{ top: "3%", left: "5%", width: 45, height: 45 }}
       />
       <BgIcon
         source={require("../assets/medical/pills.png")}
-        style={{ top: 80, left: 100, width: 38, height: 38 }}
+        style={{ top: "6%", left: "25%", width: 40, height: 40 }}
       />
       <BgIcon
         source={require("../assets/medical/doctor.png")}
-        style={{ top: 255, right: 250, width: 42, height: 42 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/syringe_medical.png")}
-        style={{ top: 195, left: 290, width: 45, height: 45 }}
+        style={{ top: "12%", left: "8%", width: 50, height: 50 }}
       />
       <BgIcon
         source={require("../assets/medical/healthcare.png")}
-        style={{ top: 235, right: 10, width: 40, height: 40 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ top: height * 0.38, left: 60, width: 42, height: 42 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ top: height * 0.39, right: 230, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ top: height * 0.39, left: 130, width: 40, height: 40 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ top: 350, left: 10, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ top: 130, right: 10, width: 48, height: 48 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ top: 300, left: 60, width: 42, height: 42 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/first-aid-kit.png")}
-        style={{ top: 320, right: 280, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ top: 350, left: 440, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ top: 170, left: 200, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ top: 220, left: 40, width: 48, height: 48 }}
+        style={{ top: "18%", left: "15%", width: 48, height: 48 }}
       />
       <BgIcon
         source={require("../assets/medical/syringe_medical.png")}
-        style={{ top: 350, right: 60, width: 52, height: 52 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ top: 90, left: 250, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/healthcare.png")}
-        style={{ top: 150, left: 20, width: 55, height: 55 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ top: 70, right: 110, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ top: 250, left: 120, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ top: 60, left: 10, width: 55, height: 55 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ top: 50, right: 20, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/syringe_medical.png")}
-        style={{ top: 79, left: 170, width: 60, height: 60 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/first-aid-kit.png")}
-        style={{ top: 150, right: 70, width: 65, height: 65 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/hospital.png")}
-        style={{ top: 170, left: 100, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/consultation.png")}
-        style={{ top: 250, right: 70, width: 55, height: 55 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/mental-health.png")}
-        style={{ top: 280, left: 270, width: 60, height: 60 }}
+        style={{ top: "25%", left: "5%", width: 52, height: 52 }}
       />
       <BgIcon
         source={require("../assets/medical/stethoscope.png")}
-        style={{ top: 360, right: 130, width: 55, height: 55 }}
+        style={{ top: "32%", left: "20%", width: 45, height: 45 }}
       />
 
-      {/* ================= BOTTOM ICONS ================= */}
-
+      {/* TOP CENTER */}
       <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ bottom: height * 0.35, right: 10, width: 42, height: 42 }}
+        source={require("../assets/medical/hospital.png")}
+        style={{ top: "4%", left: "45%", width: 55, height: 55 }}
       />
       <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ bottom: height * 0.34, left: 10, width: 45, height: 45 }}
+        source={require("../assets/medical/first-aid-kit.png")}
+        style={{ top: "12%", left: "50%", width: 50, height: 50 }}
       />
       <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ bottom: height * 0.34, right: 220, width: 40, height: 40 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ bottom: 50, left: 0, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ bottom: 270, right: 110, width: 48, height: 48 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ bottom: 30, left: 220, width: 44, height: 44 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/syringe_medical.png")}
-        style={{ bottom: 30, right: 50, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ bottom: 260, left: 10, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ bottom: 290, right: 290, width: 45, height: 45 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ bottom: 120, left: 30, width: 48, height: 48 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/healthcare.png")}
-        style={{ bottom: 250, right: 210, width: 55, height: 55 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/doctor.png")}
-        style={{ bottom: 260, right: 20, width: 55, height: 55 }}
+        source={require("../assets/medical/consultation.png")}
+        style={{ top: "20%", left: "42%", width: 48, height: 48 }}
       />
       <BgIcon
         source={require("../assets/medical/mental-health.png")}
-        style={{ bottom: 180, left: 16, width: 60, height: 60 }}
+        style={{ top: "28%", left: "48%", width: 52, height: 52 }}
       />
+
+      {/* TOP RIGHT */}
       <BgIcon
-        source={require("../assets/medical/first-aid-kit.png")}
-        style={{ bottom: 150, right: 210, width: 50, height: 50 }}
+        source={require("../assets/medical/pills.png")}
+        style={{ top: "3%", right: "8%", width: 48, height: 48 }}
       />
       <BgIcon
         source={require("../assets/medical/heart.png")}
-        style={{ bottom: 50, left: 90, width: 45, height: 45 }}
+        style={{ top: "8%", right: "5%", width: 45, height: 45 }}
       />
       <BgIcon
         source={require("../assets/medical/doctor.png")}
-        style={{ bottom: 290, left: 70, width: 60, height: 60 }}
+        style={{ top: "14%", right: "12%", width: 52, height: 52 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/consultation.png")}
+        style={{ top: "22%", right: "6%", width: 50, height: 50 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/mental-health.png")}
+        style={{ top: "28%", right: "15%", width: 55, height: 55 }}
       />
       <BgIcon
         source={require("../assets/medical/healthcare.png")}
-        style={{ bottom: 200, right: 60, width: 55, height: 55 }}
+        style={{ top: "35%", right: "8%", width: 48, height: 48 }}
       />
-      <BgIcon
-        source={require("../assets/medical/heart.png")}
-        style={{ bottom: 210, left: 130, width: 50, height: 50 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/pills.png")}
-        style={{ bottom: 150, right: 120, width: 60, height: 60 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/syringe_medical.png")}
-        style={{ bottom: 140, left: 110, width: 55, height: 55 }}
-      />
+
+      {/* MIDDLE LEFT */}
       <BgIcon
         source={require("../assets/medical/first-aid-kit.png")}
-        style={{ bottom: 90, right: 40, width: 65, height: 65 }}
-      />
-      <BgIcon
-        source={require("../assets/medical/chemistry_icon.png")}
-        style={{ bottom: 70, left: 170, width: 55, height: 55 }}
+        style={{ top: "44%", left: "2%", width: 40, height: 40 }}
       />
       <BgIcon
         source={require("../assets/medical/hospital.png")}
-        style={{ bottom: 40, right: 150, width: 60, height: 60 }}
+        style={{ top: "50%", left: "6%", width: 38, height: 38 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/stethoscope.png")}
+        style={{ top: "56%", left: "3%", width: 40, height: 40 }}
       />
 
-      {/* ================= LOGO ================= */}
+      {/* MIDDLE RIGHT */}
+      <BgIcon
+        source={require("../assets/medical/healthcare.png")}
+        style={{ top: "44%", right: "2%", width: 40, height: 40 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/syringe_medical.png")}
+        style={{ top: "50%", right: "6%", width: 38, height: 38 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/consultation.png")}
+        style={{ top: "56%", right: "3%", width: 40, height: 40 }}
+      />
 
-      <Animated.View
-        style={[styles.logoContainer, { transform: [{ scale: logoScale }] }]}
-      >
-        <Image
-          source={require("../assets/unnamed.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </Animated.View>
+      {/* BOTTOM LEFT */}
+      <BgIcon
+        source={require("../assets/medical/doctor.png")}
+        style={{ bottom: "3%", left: "5%", width: 48, height: 48 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/heart.png")}
+        style={{ bottom: "8%", left: "12%", width: 50, height: 50 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/pills.png")}
+        style={{ bottom: "14%", left: "6%", width: 45, height: 45 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/healthcare.png")}
+        style={{ bottom: "20%", left: "15%", width: 52, height: 52 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/syringe_medical.png")}
+        style={{ bottom: "27%", left: "8%", width: 48, height: 48 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/hospital.png")}
+        style={{ bottom: "34%", left: "18%", width: 50, height: 50 }}
+      />
 
-      {/* ================= TEXT ================= */}
+      {/* BOTTOM CENTER */}
+      <BgIcon
+        source={require("../assets/medical/first-aid-kit.png")}
+        style={{ bottom: "5%", left: "45%", width: 55, height: 55 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/stethoscope.png")}
+        style={{ bottom: "12%", left: "48%", width: 50, height: 50 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/heart.png")}
+        style={{ bottom: "20%", left: "42%", width: 52, height: 52 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/pills.png")}
+        style={{ bottom: "28%", left: "46%", width: 48, height: 48 }}
+      />
 
-      <Animated.View
-        style={[
-          styles.bottomText,
-          {
+      {/* BOTTOM RIGHT */}
+      <BgIcon
+        source={require("../assets/medical/pills.png")}
+        style={{ bottom: "3%", right: "8%", width: 50, height: 50 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/heart.png")}
+        style={{ bottom: "9%", right: "5%", width: 48, height: 48 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/doctor.png")}
+        style={{ bottom: "16%", right: "12%", width: 52, height: 52 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/consultation.png")}
+        style={{ bottom: "23%", right: "7%", width: 50, height: 50 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/mental-health.png")}
+        style={{ bottom: "30%", right: "15%", width: 55, height: 55 }}
+      />
+      <BgIcon
+        source={require("../assets/medical/syringe_medical.png")}
+        style={{ bottom: "37%", right: "8%", width: 48, height: 48 }}
+      />
+
+      {/* CENTER LOGO */}
+      <View style={styles.centerContent}>
+        <Animated.View style={{ transform: [{ scale: logoScale }] }}>
+          <Image
+            source={require("../assets/unnamed.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </Animated.View>
+
+        <Animated.View
+          style={{
             opacity: textFade,
             transform: [{ translateY: textMove }],
-          },
-        ]}
-      >
-        <Text style={styles.appName}>Doctosmart</Text>
-      </Animated.View>
+          }}
+        >
+          <Text style={styles.title}>DoctoSmart</Text>
+        </Animated.View>
+      </View>
     </View>
   );
 }
@@ -301,30 +253,39 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0cddfd",
+    backgroundColor: "#12b3c7",
   },
+
   bgIcon: {
     position: "absolute",
-    opacity: 0.25,
+    opacity: 0.15,
   },
-  logoContainer: {
-    position: "absolute",
-    top: height * 0.45,
-    alignSelf: "center",
+
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
+
   logo: {
-    width: width * 0.35,
-    height: width * 0.35,
+    width: width * 0.4,
+    height: width * 0.4,
+    tintColor: "#fff",
+    marginBottom: 20,
   },
-  bottomText: {
-    position: "absolute",
-    top: height * 0.45 + width * 0.35 + 10,
-    alignSelf: "center",
+
+  title: {
+    fontSize: width * 0.08,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: 2,
   },
-  appName: {
-    color: "#FFFFFF",
-    fontSize: 32,
-    fontWeight: "500",
-    letterSpacing: 1,
+
+  subtitle: {
+    fontSize: width * 0.04,
+    color: "#e6f6f8",
+    textAlign: "center",
+    marginTop: 8,
   },
 });

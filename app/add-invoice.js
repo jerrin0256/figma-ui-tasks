@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -11,6 +11,7 @@ import {
 
 export default function AddInvoice() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [treatments, setTreatments] = useState([
     {
@@ -60,6 +61,20 @@ export default function AddInvoice() {
 
   const grandTotal = subTotal + totalTax;
 
+  useEffect(() => {
+    if (params.updatedTreatment) {
+      const updated = JSON.parse(params.updatedTreatment);
+      setTreatments((prev) =>
+        prev.map((t) => (t.id === updated.id ? updated : t))
+      );
+    }
+    if (params.deleteTreatment) {
+      setTreatments((prev) =>
+        prev.filter((t) => t.id !== parseInt(params.deleteTreatment))
+      );
+    }
+  }, [params.updatedTreatment, params.deleteTreatment]);
+
   return (
     <View style={styles.container}>
       {/* HEADER */}
@@ -78,7 +93,10 @@ export default function AddInvoice() {
         <View style={styles.treatmentHeader}>
           <Text style={styles.sectionTitle}>Treatments</Text>
 
-          <TouchableOpacity style={styles.addBtn}>
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => router.push("/treatment-detail")}
+          >
             <Text style={{ color: "#12b3c7", fontWeight: "600" }}>
               Add Treatment
             </Text>
@@ -99,7 +117,16 @@ export default function AddInvoice() {
           </View>
 
           {treatments.map((item, index) => (
-            <View key={item.id} style={styles.tableRow}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.tableRow}
+              onPress={() =>
+                router.push({
+                  pathname: "/treatment-detail",
+                  params: { treatment: JSON.stringify(item) },
+                })
+              }
+            >
               <Text style={styles.cell}>{index + 1}</Text>
               <Text style={[styles.cell, { flex: 2 }]}>{item.name}</Text>
               <Text style={styles.cell}>{item.qty}</Text>
@@ -107,7 +134,7 @@ export default function AddInvoice() {
               <Text style={styles.cell}>{item.discount}</Text>
               <Text style={styles.cell}>GST{item.tax}</Text>
               <Text style={styles.cell}>{calculateAmount(item)}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 

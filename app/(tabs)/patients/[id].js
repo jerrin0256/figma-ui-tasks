@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,15 +13,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import EditAppointmentModal from "../../../src/components/EditAppointment"; // ✅ correct import
+
 export default function PatientDetails() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState("Appointments");
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(null);
   const [noteVisible, setNoteVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [viewFile, setViewFile] = useState(null);
   const tabs = [
     "Appointments",
     "Clinical Notes",
@@ -90,10 +93,19 @@ export default function PatientDetails() {
   const [treatmentPlans, setTreatmentPlans] = useState([
     {
       id: 1,
-      title: "Physiotherapy",
-      sessions: 10,
-      duration: "30 Days",
-      notes: "Daily stretching and strengthening exercises.",
+      name: "Acne scar surgery",
+      qty: 1,
+      price: 6000,
+      discount: 999,
+      tax: 5,
+    },
+    {
+      id: 2,
+      name: "Cosmetic resurfacing",
+      qty: 2,
+      price: 5500,
+      discount: 200,
+      tax: 5,
     },
   ]);
   const [invoices, setInvoices] = useState([
@@ -112,7 +124,7 @@ export default function PatientDetails() {
       ],
     },
   ]);
-  const [payments, setPayments] = useState([
+  const [payments] = useState([
     {
       id: 1,
       doctor: "Dr Muhammed Iqbal",
@@ -129,14 +141,56 @@ export default function PatientDetails() {
       name: "Blood Report.pdf",
       date: "21 Apr 2024",
       size: "2.4 MB",
+      type: "document",
     },
     {
       id: 2,
       name: "Xray Image.jpg",
       date: "20 Apr 2024",
       size: "1.2 MB",
+      type: "image",
     },
   ]);
+
+  const [addNoteModal, setAddNoteModal] = useState(false);
+  const [newNote, setNewNote] = useState({
+    doctor: "",
+    date: "",
+    time: "",
+    complaint: "",
+    observation: "",
+    investigation: "",
+    diagnosis: "",
+    notes: "",
+  });
+
+  useEffect(() => {
+    if (params.newAttachment) {
+      const newFile = JSON.parse(params.newAttachment);
+      setAttachments((prev) => [newFile, ...prev]);
+    }
+    if (params.updatedTreatment) {
+      const updated = JSON.parse(params.updatedTreatment);
+      setTreatmentPlans((prev) =>
+        prev.some((t) => t.id === updated.id)
+          ? prev.map((t) => (t.id === updated.id ? updated : t))
+          : [updated, ...prev]
+      );
+    }
+    if (params.deleteTreatment) {
+      setTreatmentPlans((prev) =>
+        prev.filter((t) => t.id !== parseInt(params.deleteTreatment))
+      );
+    }
+  }, [params.newAttachment, params.updatedTreatment, params.deleteTreatment]);
+
+  const calculateAmount = (item) => {
+    const total = item.qty * item.price;
+    const discount = item.discount;
+    const tax = (total - discount) * (item.tax / 100);
+    return total - discount + tax;
+  };
+
   const handleDelete = (id) => {
     Alert.alert("Delete", "Are you sure?", [
       { text: "Cancel" },
@@ -149,37 +203,30 @@ export default function PatientDetails() {
   };
 
   const handleSave = (updatedAppointment) => {
-    setAppointments((prev) =>
-      prev.map((item) =>
-        item.id === updatedAppointment.id ? updatedAppointment : item,
-      ),
-    );
+    if (updatedAppointment._delete) {
+      setAppointments((prev) =>
+        prev.filter((item) => item.id !== updatedAppointment.id)
+      );
+    } else {
+      setAppointments((prev) =>
+        prev.map((item) =>
+          item.id === updatedAppointment.id ? updatedAppointment : item
+        )
+      );
+    }
     setVisible(false);
   };
 
   const renderAppointment = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity 
+      style={styles.card}
+      onPress={() => {
+        setSelected(item);
+        setVisible(true);
+      }}
+    >
       <View style={styles.cardTop}>
         <Text style={styles.doctor}>{item.doctor}</Text>
-
-        <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => {
-              setSelected(item);
-              setVisible(true);
-            }}
-          >
-            <Ionicons name="create-outline" size={18} color="#12b3c7" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => handleDelete(item.id)}
-          >
-            <Ionicons name="trash-outline" size={18} color="red" />
-          </TouchableOpacity>
-        </View>
       </View>
 
       <View style={styles.row}>
@@ -188,7 +235,7 @@ export default function PatientDetails() {
       </View>
 
       <Text style={[styles.status, { color: item.color }]}>{item.status}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderClinicNote = ({ item }) => (
@@ -199,7 +246,6 @@ export default function PatientDetails() {
         setNoteVisible(true);
       }}
     >
-      {/* LEFT SIDE */}
       <View style={{ flex: 1 }}>
         <Text style={styles.noteTitle}>{item.complaint.join(", ")}</Text>
 
@@ -228,16 +274,14 @@ export default function PatientDetails() {
         </View>
       </View>
 
-      {/* RIGHT SIDE */}
       <View style={styles.dateContainer}>
         <Text style={styles.bigDate}>{item.date.split("-")[0].trim()}</Text>
-
         <Text style={styles.monthText}>APR | 2024</Text>
-
         <Text style={styles.doctorText}>{item.doctor.toUpperCase()}</Text>
       </View>
     </TouchableOpacity>
   );
+
   const renderPrescription = ({ item }) => (
     <TouchableOpacity
       style={styles.noteItem}
@@ -265,30 +309,38 @@ export default function PatientDetails() {
       </View>
     </TouchableOpacity>
   );
+
   const renderTreatmentPlan = ({ item }) => (
     <TouchableOpacity
       style={styles.noteItem}
-      onPress={() => {
-        setSelectedNote(item);
-        setNoteVisible(true);
-      }}
+      onPress={() =>
+        router.push({
+          pathname: "/treatment-detail",
+          params: { treatment: JSON.stringify(item), from: "patient" },
+        })
+      }
     >
       <View style={{ flex: 1 }}>
-        <Text style={styles.noteTitle}>{item.title}</Text>
+        <Text style={styles.noteTitle}>{item.name}</Text>
 
         <View style={styles.tagRow}>
-          <Text style={styles.tag}>Sessions: {item.sessions}</Text>
-          <Text style={styles.tag}>{item.duration}</Text>
+          <Text style={styles.tag}>Qty: {item.qty}</Text>
+          <Text style={styles.tag}>Price: ₹{item.price}</Text>
+        </View>
+        
+        <View style={styles.tagRow}>
+          <Text style={styles.tag}>Discount: ₹{item.discount}</Text>
+          <Text style={styles.tag}>Tax: GST {item.tax}%</Text>
         </View>
       </View>
 
       <View style={styles.dateContainer}>
-        <Text style={styles.bigDate}>{item.sessions}</Text>
-        <Text style={styles.monthText}>SESSIONS</Text>
-        <Text style={styles.doctorText}>Treatment</Text>
+        <Text style={styles.bigDate}>₹{calculateAmount(item).toFixed(0)}</Text>
+        <Text style={styles.monthText}>TOTAL AMOUNT</Text>
       </View>
     </TouchableOpacity>
   );
+
   const renderInvoice = ({ item }) => (
     <TouchableOpacity
       style={styles.invoiceCard}
@@ -313,11 +365,11 @@ export default function PatientDetails() {
         <Text style={styles.invoiceDate}>{item.date}</Text>
         <Text style={styles.invoiceNo}>{item.invoiceNo}</Text>
         <Text style={styles.invoiceAmount}>{item.amount}</Text>
-
         <Text style={styles.invoiceStatus}>{item.status}</Text>
       </View>
     </TouchableOpacity>
   );
+
   const renderPayment = ({ item }) => (
     <TouchableOpacity
       style={styles.invoiceCard}
@@ -331,248 +383,229 @@ export default function PatientDetails() {
       <View style={{ flex: 1 }}>
         <Text style={styles.doctor}>{item.doctor}</Text>
 
-        <View style={{ flexDirection: "row", marginTop: 6 }}>
-          <Text style={{ fontWeight: "600" }}>{item.invoiceNo}</Text>
-          <Text style={{ marginLeft: 10, color: "#12b3c7" }}>
-            {item.amount}
-          </Text>
+        <View style={{ flexDirection: "row", alignItems: "baseline", marginTop: 8, gap: 12 }}>
+          <Text style={styles.paymentInvoice}>{item.invoiceNo}</Text>
+          <Text style={styles.paymentAmount}>{item.amount}</Text>
         </View>
+
+        {item.description && (
+          <Text style={styles.paymentDesc} numberOfLines={1}>
+            {item.description}
+          </Text>
+        )}
       </View>
 
-      <View style={{ alignItems: "flex-end" }}>
+      <View style={styles.invoiceRight}>
         <Text style={styles.invoiceDate}>{item.date}</Text>
-        <Text style={{ marginTop: 6 }}>{item.time}</Text>
+        <Text style={styles.paymentTime}>{item.time}</Text>
       </View>
     </TouchableOpacity>
   );
-  const renderAttachment = ({ item }) => (
-    <TouchableOpacity style={styles.attachmentCard}>
-      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-        <Ionicons name="document-outline" size={24} color="#12b3c7" />
 
+  const handleDeleteAttachment = (id) => {
+    Alert.alert("Delete", "Delete this attachment?", [
+      { text: "Cancel" },
+      {
+        text: "Delete",
+        onPress: () =>
+          setAttachments((prev) => prev.filter((item) => item.id !== id)),
+      },
+    ]);
+  };
+
+  const renderAttachment = ({ item }) => (
+    <View style={styles.attachmentCard}>
+      <TouchableOpacity
+        style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+        onPress={() => setViewFile(item)}
+      >
+        <Ionicons
+          name={item.type === "image" ? "image-outline" : "document-outline"}
+          size={24}
+          color="#12b3c7"
+        />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.attachmentName}>{item.name}</Text>
           <Text style={styles.attachmentMeta}>
-            {item.date} • {item.size}
+            {item.date.includes("-")
+              ? item.date
+              : new Date(item.date).toLocaleDateString()}
           </Text>
         </View>
-      </View>
-
-      <Ionicons name="eye-outline" size={20} color="#6b7280" />
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => handleDeleteAttachment(item.id)}
+        style={{ marginLeft: 10 }}
+      >
+        <Ionicons name="trash-outline" size={20} color="red" />
+      </TouchableOpacity>
+    </View>
   );
+
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={20} color="#12b3c7" />
         </TouchableOpacity>
-
         <Text style={styles.headerTitle}>Patient Details</Text>
-
         <View style={{ width: 40 }} />
       </View>
-      {/* PROFILE */}
+
       <View style={styles.profileCard}>
         <Image
           source={require("../../../assets/patient1.jpg")}
           style={styles.avatar}
         />
-
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>Muhammed Janees</Text>
           <Text style={styles.sub}>Male • 39 years old</Text>
         </View>
       </View>
-      {/* BODY */}
+
       <View style={styles.body}>
-        {/* TABS */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabRow}
-        >
-          {tabs.map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-              style={styles.tabItem}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
+        <View style={styles.tabSection}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabRow}
+          >
+            {tabs.map((tab) => (
+              <TouchableOpacity
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={styles.tabItem}
               >
-                {tab}
-              </Text>
-              {activeTab === tab && <View style={styles.activeIndicator} />}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.activeTabText,
+                  ]}
+                >
+                  {tab}
+                </Text>
+                {activeTab === tab && <View style={styles.activeIndicator} />}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => {
+              if (activeTab === "Appointments") router.push("/add-appointment");
+              else if (activeTab === "Clinical Notes") router.push("/add-clinic-note");
+              else if (activeTab === "Prescription") router.push("/add-prescription");
+              else if (activeTab === "Treatment Plan")
+                router.push({
+                  pathname: "/treatment-detail",
+                  params: { from: "patient" },
+                });
+              else if (activeTab === "Invoice") router.push("/add-invoice");
+              else if (activeTab === "Payment") router.push("/add-payment");
+              else if (activeTab === "Attachment") router.push("/add-attachment");
+            }}
+          >
+            <Ionicons name="add" size={20} color="#fff" />
+            <Text style={styles.addBtnText}>Add New</Text>
+          </TouchableOpacity>
+        </View>
 
         {activeTab === "Appointments" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("../../../add-appointment")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add New</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={appointments}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderAppointment}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 480,
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-          </>
+          <FlatList
+            data={appointments}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderAppointment}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 480,
+            }}
+            showsVerticalScrollIndicator={false}
+          />
         )}
 
         {activeTab === "Clinical Notes" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-clinic-note")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add New</Text>
-            </TouchableOpacity>
-            <FlatList
-              data={clinicNotes}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderClinicNote}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 650,
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-          </>
+          <FlatList
+            data={clinicNotes}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderClinicNote}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 650,
+            }}
+            showsVerticalScrollIndicator={false}
+          />
         )}
 
         {activeTab === "Prescription" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-prescription")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add New</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={prescriptions}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderPrescription}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 550,
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-          </>
+          <FlatList
+            data={prescriptions}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderPrescription}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 550,
+            }}
+            showsVerticalScrollIndicator={false}
+          />
         )}
 
         {activeTab === "Treatment Plan" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-treatment-plan")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add New</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={treatmentPlans}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderTreatmentPlan}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 550,
-              }}
-              showsVerticalScrollIndicator={false}
-            />
-          </>
+          <FlatList
+            data={treatmentPlans}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderTreatmentPlan}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 550,
+            }}
+            showsVerticalScrollIndicator={false}
+          />
         )}
+
         {activeTab === "Invoice" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-invoice")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add Invoice</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={invoices}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderInvoice}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 550,
-              }}
-            />
-          </>
+          <FlatList
+            data={invoices}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderInvoice}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 550,
+            }}
+          />
         )}
+
         {activeTab === "Payment" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-payment")}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Add Payment</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={payments}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderPayment}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 700,
-              }}
-            />
-          </>
+          <FlatList
+            data={payments}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderPayment}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 700,
+            }}
+          />
         )}
-        {activeTab === "Attachment" && (
-          <>
-            <TouchableOpacity
-              style={styles.addAppointmentBtn}
-              onPress={() => router.push("/add-attachment")}
-            >
-              <Ionicons name="cloud-upload-outline" size={20} color="#fff" />
-              <Text style={styles.addAppointmentText}>Upload File</Text>
-            </TouchableOpacity>
 
-            <FlatList
-              data={attachments}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={renderAttachment}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                paddingTop: 15,
-                paddingBottom: 550,
-              }}
-            />
-          </>
+        {activeTab === "Attachment" && (
+          <FlatList
+            data={attachments}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderAttachment}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 15,
+              paddingBottom: 550,
+            }}
+          />
         )}
       </View>
+
       <EditAppointmentModal
         visible={visible}
         appointment={selected}
@@ -587,7 +620,6 @@ export default function PatientDetails() {
               <TouchableOpacity onPress={() => setNoteVisible(false)}>
                 <Ionicons name="chevron-back" size={22} color="#12b3c7" />
               </TouchableOpacity>
-
               <Text style={styles.modalTitle}>
                 {activeTab === "Prescription"
                   ? "Prescription"
@@ -597,14 +629,12 @@ export default function PatientDetails() {
                       ? "Invoice"
                       : "Clinic Note"}
               </Text>
-
               <View style={{ width: 22 }} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={{ paddingHorizontal: 20 }}>
                 <View style={{ paddingHorizontal: 20 }}>
-                  {/* Doctor */}
                   <Text style={styles.sectionTitle}>Doctor</Text>
                   {isEditing ? (
                     <TextInput
@@ -618,7 +648,6 @@ export default function PatientDetails() {
                     <Text>{selectedNote?.doctor}</Text>
                   )}
 
-                  {/* Date */}
                   <Text style={styles.sectionTitle}>Date</Text>
                   {isEditing ? (
                     <TextInput
@@ -632,7 +661,6 @@ export default function PatientDetails() {
                     <Text>{selectedNote?.date}</Text>
                   )}
 
-                  {/* Time */}
                   {selectedNote?.time && (
                     <>
                       <Text style={styles.sectionTitle}>Time</Text>
@@ -650,15 +678,12 @@ export default function PatientDetails() {
                     </>
                   )}
 
-                  {/* INVOICE DETAILS */}
                   {activeTab === "Invoice" && (
                     <>
                       <Text style={styles.sectionTitle}>Invoice No</Text>
                       <Text>{selectedNote?.invoiceNo}</Text>
-
                       <Text style={styles.sectionTitle}>Amount</Text>
                       <Text>{selectedNote?.amount}</Text>
-
                       <Text style={styles.sectionTitle}>Treatments</Text>
                       <View style={styles.tagRow}>
                         {selectedNote?.treatments?.map((t, i) => (
@@ -670,45 +695,104 @@ export default function PatientDetails() {
                     </>
                   )}
 
-                  {/* Clinic Note Fields */}
                   {activeTab === "Clinical Notes" && (
                     <>
                       <Text style={styles.sectionTitle}>Complaint</Text>
-                      <View style={styles.tagRow}>
-                        {selectedNote?.complaint?.map((tag, i) => (
-                          <Text key={i} style={styles.modalTag}>
-                            {tag}
-                          </Text>
-                        ))}
-                      </View>
-
+                      {isEditing ? (
+                        <TextInput
+                          value={selectedNote?.complaint?.join(", ")}
+                          onChangeText={(text) =>
+                            setSelectedNote({ 
+                              ...selectedNote, 
+                              complaint: text.split(",").map(s => s.trim()).filter(s => s) 
+                            })
+                          }
+                          style={styles.editInput}
+                          placeholder="Enter complaints separated by commas"
+                          multiline
+                        />
+                      ) : (
+                        <View style={styles.tagRow}>
+                          {selectedNote?.complaint?.map((tag, i) => (
+                            <Text key={i} style={styles.modalTag}>
+                              {tag}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      
                       <Text style={styles.sectionTitle}>Observation</Text>
-                      <View style={styles.tagRow}>
-                        {selectedNote?.observation?.map((tag, i) => (
-                          <Text key={i} style={styles.modalTag}>
-                            {tag}
-                          </Text>
-                        ))}
-                      </View>
-
+                      {isEditing ? (
+                        <TextInput
+                          value={selectedNote?.observation?.join(", ")}
+                          onChangeText={(text) =>
+                            setSelectedNote({ 
+                              ...selectedNote, 
+                              observation: text.split(",").map(s => s.trim()).filter(s => s) 
+                            })
+                          }
+                          style={styles.editInput}
+                          placeholder="Enter observations separated by commas"
+                          multiline
+                        />
+                      ) : (
+                        <View style={styles.tagRow}>
+                          {selectedNote?.observation?.map((tag, i) => (
+                            <Text key={i} style={styles.modalTag}>
+                              {tag}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      
                       <Text style={styles.sectionTitle}>Investigation</Text>
-                      <View style={styles.tagRow}>
-                        {selectedNote?.investigation?.map((tag, i) => (
-                          <Text key={i} style={styles.modalTag}>
-                            {tag}
-                          </Text>
-                        ))}
-                      </View>
-
+                      {isEditing ? (
+                        <TextInput
+                          value={selectedNote?.investigation?.join(", ")}
+                          onChangeText={(text) =>
+                            setSelectedNote({ 
+                              ...selectedNote, 
+                              investigation: text.split(",").map(s => s.trim()).filter(s => s) 
+                            })
+                          }
+                          style={styles.editInput}
+                          placeholder="Enter investigations separated by commas"
+                          multiline
+                        />
+                      ) : (
+                        <View style={styles.tagRow}>
+                          {selectedNote?.investigation?.map((tag, i) => (
+                            <Text key={i} style={styles.modalTag}>
+                              {tag}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      
                       <Text style={styles.sectionTitle}>Diagnosis</Text>
-                      <View style={styles.tagRow}>
-                        {selectedNote?.diagnosis?.map((tag, i) => (
-                          <Text key={i} style={styles.modalTag}>
-                            {tag}
-                          </Text>
-                        ))}
-                      </View>
-
+                      {isEditing ? (
+                        <TextInput
+                          value={selectedNote?.diagnosis?.join(", ")}
+                          onChangeText={(text) =>
+                            setSelectedNote({ 
+                              ...selectedNote, 
+                              diagnosis: text.split(",").map(s => s.trim()).filter(s => s) 
+                            })
+                          }
+                          style={styles.editInput}
+                          placeholder="Enter diagnosis separated by commas"
+                          multiline
+                        />
+                      ) : (
+                        <View style={styles.tagRow}>
+                          {selectedNote?.diagnosis?.map((tag, i) => (
+                            <Text key={i} style={styles.modalTag}>
+                              {tag}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      
                       <Text style={styles.sectionTitle}>Other Notes</Text>
                       <View style={styles.notesBox}>
                         {isEditing ? (
@@ -719,6 +803,7 @@ export default function PatientDetails() {
                             }
                             multiline
                             style={{ minHeight: 80 }}
+                            placeholder="Enter additional notes"
                           />
                         ) : (
                           <Text>{selectedNote?.notes}</Text>
@@ -730,7 +815,6 @@ export default function PatientDetails() {
               </View>
             </ScrollView>
 
-            {/* FOOTER */}
             <View style={styles.modalFooter}>
               {isEditing ? (
                 <TouchableOpacity
@@ -760,7 +844,6 @@ export default function PatientDetails() {
                         ),
                       );
                     }
-
                     setIsEditing(false);
                     setNoteVisible(false);
                   }}
@@ -796,11 +879,176 @@ export default function PatientDetails() {
                       prev.filter((n) => n.id !== selectedNote.id),
                     );
                   }
-
                   setNoteVisible(false);
                 }}
               >
                 <Ionicons name="trash-outline" size={26} color="red" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {viewFile && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.fileViewModal}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setViewFile(null)}>
+                <Ionicons name="close" size={24} color="#12b3c7" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>{viewFile.name}</Text>
+              <View style={{ width: 24 }} />
+            </View>
+            {viewFile.type === "image" && viewFile.uri ? (
+              <Image
+                source={{ uri: viewFile.uri }}
+                style={styles.fileImage}
+                resizeMode="contain"
+              />
+            ) : (
+              <View style={styles.filePreview}>
+                <Ionicons name="document-text" size={80} color="#12b3c7" />
+                <Text style={styles.fileName}>{viewFile.name}</Text>
+                <Text style={styles.fileInfo}>
+                  Document preview not available
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
+      {addNoteModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Clinical Note</Text>
+              <TouchableOpacity onPress={() => {
+                setAddNoteModal(false);
+                setNewNote({
+                  doctor: "",
+                  date: "",
+                  time: "",
+                  complaint: "",
+                  observation: "",
+                  investigation: "",
+                  diagnosis: "",
+                  notes: "",
+                });
+              }}>
+                <Ionicons name="close" size={22} color="#12b3c7" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ paddingHorizontal: 20 }}>
+                <Text style={styles.sectionTitle}>Doctor</Text>
+                <TextInput
+                  value={newNote.doctor}
+                  onChangeText={(text) => setNewNote({ ...newNote, doctor: text })}
+                  style={styles.editInput}
+                  placeholder="Enter doctor name"
+                />
+
+                <Text style={styles.sectionTitle}>Date</Text>
+                <TextInput
+                  value={newNote.date}
+                  onChangeText={(text) => setNewNote({ ...newNote, date: text })}
+                  style={styles.editInput}
+                  placeholder="DD - MM - YYYY"
+                />
+
+                <Text style={styles.sectionTitle}>Time</Text>
+                <TextInput
+                  value={newNote.time}
+                  onChangeText={(text) => setNewNote({ ...newNote, time: text })}
+                  style={styles.editInput}
+                  placeholder="HH:MM am/pm"
+                />
+
+                <Text style={styles.sectionTitle}>Complaint</Text>
+                <TextInput
+                  value={newNote.complaint}
+                  onChangeText={(text) => setNewNote({ ...newNote, complaint: text })}
+                  style={styles.editInput}
+                  placeholder="Enter complaints separated by commas"
+                  multiline
+                />
+
+                <Text style={styles.sectionTitle}>Observation</Text>
+                <TextInput
+                  value={newNote.observation}
+                  onChangeText={(text) => setNewNote({ ...newNote, observation: text })}
+                  style={styles.editInput}
+                  placeholder="Enter observations separated by commas"
+                  multiline
+                />
+
+                <Text style={styles.sectionTitle}>Investigation</Text>
+                <TextInput
+                  value={newNote.investigation}
+                  onChangeText={(text) => setNewNote({ ...newNote, investigation: text })}
+                  style={styles.editInput}
+                  placeholder="Enter investigations separated by commas"
+                  multiline
+                />
+
+                <Text style={styles.sectionTitle}>Diagnosis</Text>
+                <TextInput
+                  value={newNote.diagnosis}
+                  onChangeText={(text) => setNewNote({ ...newNote, diagnosis: text })}
+                  style={styles.editInput}
+                  placeholder="Enter diagnosis separated by commas"
+                  multiline
+                />
+
+                <Text style={styles.sectionTitle}>Other Notes</Text>
+                <TextInput
+                  value={newNote.notes}
+                  onChangeText={(text) => setNewNote({ ...newNote, notes: text })}
+                  style={[styles.editInput, { minHeight: 80 }]}
+                  placeholder="Enter additional notes"
+                  multiline
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={modalStyles.saveBtn}
+                onPress={() => {
+                  if (!newNote.doctor || !newNote.complaint) {
+                    Alert.alert("Error", "Please fill doctor and complaint fields");
+                    return;
+                  }
+                  const newId = Math.max(...clinicNotes.map(n => n.id), 0) + 1;
+                  const noteToAdd = {
+                    id: newId,
+                    doctor: newNote.doctor,
+                    date: newNote.date || new Date().toLocaleDateString(),
+                    time: newNote.time || new Date().toLocaleTimeString(),
+                    complaint: newNote.complaint.split(",").map(s => s.trim()).filter(s => s),
+                    observation: newNote.observation.split(",").map(s => s.trim()).filter(s => s),
+                    investigation: newNote.investigation.split(",").map(s => s.trim()).filter(s => s),
+                    diagnosis: newNote.diagnosis.split(",").map(s => s.trim()).filter(s => s),
+                    notes: newNote.notes,
+                  };
+                  setClinicNotes([noteToAdd, ...clinicNotes]);
+                  setAddNoteModal(false);
+                  setNewNote({
+                    doctor: "",
+                    date: "",
+                    time: "",
+                    complaint: "",
+                    observation: "",
+                    investigation: "",
+                    diagnosis: "",
+                    notes: "",
+                  });
+                  Alert.alert("Success", "Clinical note added successfully");
+                }}
+              >
+                <Text style={modalStyles.saveTxt}>Save Note</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -852,7 +1100,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 18,
     paddingTop: 12,
   },
-  tabRow: { paddingHorizontal: 20, gap: 20 },
+  tabSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    paddingBottom: 4,
+  },
+  tabRow: { paddingHorizontal: 20, gap: 20, paddingBottom: 12 },
   tabItem: { paddingBottom: 10 },
   tabText: { fontSize: 14, color: "#6b7280", fontWeight: "600" },
   activeTabText: { color: "#111827" },
@@ -862,9 +1115,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#12b3c7",
     marginTop: 8,
   },
-  addAppointmentBtn: {
+  addBtn: {
     marginHorizontal: 20,
-    marginTop: 12,
+    marginTop: 0,
     backgroundColor: "#12b3c7",
     height: 42,
     borderRadius: 10,
@@ -873,7 +1126,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
   },
-  addAppointmentText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  addBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -936,9 +1189,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   dateContainer: {
-    // width: 82,
-    // alignItems: "flex-end",
-    // justifyContent: "space-between",
     width: 90,
     alignItems: "flex-end",
     justifyContent: "space-between",
@@ -960,7 +1210,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontWeight: "600",
   },
-
   modalOverlay: {
     position: "absolute",
     top: 0,
@@ -971,14 +1220,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   modalContainer: {
     width: "90%",
     backgroundColor: "#fff",
     borderRadius: 20,
     paddingVertical: 20,
   },
-
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -986,27 +1233,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 10,
   },
-
   modalTitle: {
     fontSize: 16,
     fontWeight: "700",
   },
-
-  label: {
-    fontWeight: "600",
-    marginTop: 12,
-    marginBottom: 5,
+  sectionTitle: {
+    fontWeight: "700",
+    marginTop: 10,
+    marginBottom: 6,
   },
-
-  value: {
-    fontSize: 14,
-  },
-
-  modalTagRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-
   modalTag: {
     backgroundColor: "#d9eaee",
     paddingHorizontal: 10,
@@ -1015,66 +1250,23 @@ const styles = StyleSheet.create({
     marginRight: 6,
     marginBottom: 6,
   },
-
-  noteBox: {
-    backgroundColor: "#e8f4f6",
-    padding: 10,
-    borderRadius: 10,
-  },
-
-  modalFooter: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 15,
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
-
-  infoLabel: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
-
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  sectionTitle: {
-    fontWeight: "700",
-    marginTop: 10,
-    marginBottom: 6,
-  },
-
-  // modalTag: {
-  //   backgroundColor: "#e6f6f8",
-  //   paddingHorizontal: 10,
-  //   paddingVertical: 5,
-  //   borderRadius: 6,
-  //   marginRight: 6,
-  //   marginBottom: 6,
-  //   fontSize: 12,
-  //   color: "#0f766e",
-  // },
-
   notesBox: {
     backgroundColor: "#e6f6f8",
     padding: 12,
     borderRadius: 10,
     marginTop: 5,
   },
-
   editInput: {
     borderWidth: 1,
     borderColor: "#e5e7eb",
     borderRadius: 8,
     padding: 8,
     marginBottom: 10,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 15,
   },
   invoiceCard: {
     backgroundColor: "#fff",
@@ -1086,12 +1278,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
-
   invoiceRight: {
     alignItems: "flex-end",
     justifyContent: "space-between",
   },
-
   invoiceDate: {
     backgroundColor: "#12b3c7",
     color: "#fff",
@@ -1100,17 +1290,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     fontSize: 11,
   },
-
   invoiceNo: {
     fontWeight: "700",
     marginTop: 6,
   },
-
   invoiceAmount: {
     color: "#12b3c7",
     fontWeight: "700",
   },
-
   invoiceStatus: {
     borderWidth: 1,
     borderColor: "#22c55e",
@@ -1119,5 +1306,332 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontSize: 11,
     marginTop: 4,
+  },
+  attachmentCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    padding: 14,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  attachmentName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1f2937",
+  },
+  attachmentMeta: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 4,
+  },
+  fileViewModal: {
+    width: "95%",
+    height: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+  },
+  fileImage: {
+    width: "100%",
+    height: "90%",
+  },
+  filePreview: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  fileName: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 20,
+    textAlign: "center",
+  },
+  fileInfo: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginTop: 10,
+  },
+
+  paymentInvoice: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#374151",
+  },
+
+  paymentAmount: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#12b3c7",
+  },
+
+  paymentDesc: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 6,
+    lineHeight: 16,
+  },
+
+  paymentTime: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 6,
+  },
+});
+
+function EditAppointmentModal({ visible, onClose, appointment, onSave }) {
+  const [doctor, setDoctor] = useState(appointment?.doctor || "");
+  const [date, setDate] = useState(appointment?.date || "");
+  const [time, setTime] = useState(appointment?.time || "");
+  const [status, setStatus] = useState(appointment?.status || "");
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+
+  const statusOptions = ["COMPLETED", "UPCOMING", "AWAIT", "ENGAGED", "NOT STARTED"];
+
+  useEffect(() => {
+    if (appointment) {
+      setDoctor(appointment.doctor || "");
+      setDate(appointment.date || "");
+      setTime(appointment.time || "");
+      setStatus(appointment.status || "");
+    }
+  }, [appointment]);
+
+  const handleSave = () => {
+    onSave({ ...appointment, doctor, date, time, status });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Appointment",
+      "Are you sure you want to delete this appointment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            onSave({ ...appointment, _delete: true });
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide">
+      <View style={modalStyles.overlay}>
+        <View style={modalStyles.modal}>
+          <View style={modalStyles.header}>
+            <Text style={modalStyles.title}>Edit Appointment</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Doctor Name"
+            value={doctor}
+            onChangeText={setDoctor}
+          />
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Date"
+            value={date}
+            onChangeText={setDate}
+          />
+          <TextInput
+            style={modalStyles.input}
+            placeholder="Time"
+            value={time}
+            onChangeText={setTime}
+          />
+          
+          <TouchableOpacity
+            style={modalStyles.dropdownButton}
+            onPress={() => setShowStatusDropdown(!showStatusDropdown)}
+          >
+            <Text style={modalStyles.dropdownText}>
+              {status || "Select Status"}
+            </Text>
+            <Ionicons 
+              name={showStatusDropdown ? "chevron-up" : "chevron-down"} 
+              size={20} 
+              color="#6b7280" 
+            />
+          </TouchableOpacity>
+
+          {showStatusDropdown && (
+            <View style={modalStyles.dropdownList}>
+              {statusOptions.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={modalStyles.dropdownItem}
+                  onPress={() => {
+                    setStatus(option);
+                    setShowStatusDropdown(false);
+                  }}
+                >
+                  <Text style={[
+                    modalStyles.dropdownItemText,
+                    status === option && modalStyles.dropdownItemTextActive
+                  ]}>
+                    {option}
+                  </Text>
+                  {status === option && (
+                    <Ionicons name="checkmark" size={20} color="#12b3c7" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          <View style={modalStyles.buttonRow}>
+            <TouchableOpacity style={modalStyles.deleteBtn} onPress={handleDelete}>
+              <Text style={modalStyles.deleteTxt}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSave}>
+              <Text style={modalStyles.saveTxt}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modal: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 420,
+    maxHeight: "85%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    letterSpacing: 0.2,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 16,
+    fontSize: 15,
+    color: "#111827",
+    backgroundColor: "#f9fafb",
+  },
+  dropdownButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 16,
+    backgroundColor: "#f9fafb",
+  },
+  dropdownText: {
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "500",
+  },
+  dropdownList: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 10,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+    maxHeight: 220,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  dropdownItemText: {
+    fontSize: 15,
+    color: "#6b7280",
+    fontWeight: "500",
+  },
+  dropdownItemTextActive: {
+    color: "#12b3c7",
+    fontWeight: "700",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+  },
+  deleteBtn: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    borderWidth: 1.5,
+    borderColor: "#FCA5A5",
+  },
+  deleteTxt: {
+    color: "#DC2626",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  saveBtn: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#12b3c7",
+    shadowColor: "#12b3c7",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  saveTxt: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
 });
